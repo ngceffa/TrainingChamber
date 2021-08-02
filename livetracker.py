@@ -209,32 +209,29 @@ ptnumberstring = str(ptnumber)
 timeofday = scheme[7]
 naivetime = int(scheme[9])
 testtime = int(scheme[11])
-reciprocal = scheme[13]
-trainreps = int(scheme[15])
-rewardwhen = scheme[17]
-repetitions = int(scheme[19])+1
-rewardyn = scheme[21]
-trainingtype = scheme[23]
-phasedtraining = scheme[25]
-longerairtraining = scheme[27]
-co2offduringtrain = scheme[29]
-spacedtrainingperset = int(scheme[31])
-spacedtrainingreps = int(scheme[33])
+trainreps = int(scheme[13])
+rewardwhen = scheme[15]
+repetitions = int(scheme[17])+1
+trainingtype = scheme[19]
+phasedtraining = scheme[21]
+longerairtraining = scheme[23]
+co2offduringtrain = scheme[25]
+spacedtrainingperset = int(scheme[27])
+spacedtrainingreps = int(scheme[29])
 
 
 filepath = "/home/pi/shared/"
 filepath_vid= "/home/pi/videos/"
-filepath_event= "/home/pi/eventlog/"
 
 parameterfile = filepath + setupname + "_" + date + "_" + timeofday + "_parameters.txt"
 with open(parameterfile,'w') as filehandle:
 	filehandle.writelines("%s\n" % place for place in scheme)
 
-if reciprocal == "N":
+if trainingtype == "N":
 	filenamestring = setupname+"_"+date+"_"+timeofday+"_"+"PT"+ptnumberstring+"_"
 	videonamestring = setupname+"_"+date+"_"
 
-if reciprocal == "R":
+if trainingtype == "R":
 	filenamestring = setupname+"_"+date+"_"+timeofday+"_"+reciprocal+"_"+"PT"+ptnumberstring+"_"
 	videonamestring = setupname+"_"+date+"_"+reciprocal+"_"
 
@@ -323,16 +320,16 @@ for i in range(1,repetitions):
 	lightsvalves.offall()
 	print("training start, " + str(ptnumber) + " reps")
 	if trainingtype == "N":
-		if reciprocal == "N":
-			if co2offduringtrain == "Y":
-		        	print("CO2 off during training")
-				lightsvalves.co2offduringtraining(ptnumber)
-		        else:
-				print("CO2 reward training")
-				lightsvalves.training(ptnumber,trainreps,rewardwhen)
-		if reciprocal == "R":
-		        print("air reward training")
-			lightsvalves.reciprocal_pretrain(ptnumber)
+		if co2offduringtrain == "Y":
+		        print("CO2 off during training")
+			lightsvalves.co2offduringtraining(ptnumber)
+		else:
+			print("CO2 reward training")
+			lightsvalves.training(ptnumber,trainreps,rewardwhen)
+
+	if trainingtype == "R":
+                print("air reward training")
+                lightsvalves.reciprocal_pretrain(ptnumber)
 
 	if trainingtype == "S":
 		print("Spaced training: 2x reward, wait 15 minute; repeat 5x")
@@ -378,18 +375,9 @@ for i in range(1,repetitions):
 	
 	blocknumber = i
 	blocknumberstring = str(blocknumber)
-	if rewardyn == "Y":
-                testfilename = filenamestring + blocknumberstring + "_testreward.txt"
-		testfilename_vid = filenamestring + blocknumberstring + "_testreward.h264"
-                testfilenameall = filenamestring + blocknumberstring + "_testreward_all.txt"
-        if rewardyn == "N":
-                testfilename = filenamestring + blocknumberstring + "_testnoreward.txt"
-                testfilenameall = filenamestring + blocknumberstring + "_testnoreward_all.txt"
-		testfilename_vid = filenamestring + blocknumberstring + "_testreward.h264"
-        if rewardyn == "R":
-                testfilename = filenamestring + blocknumberstring + "_testrandomreward.txt"
-                testfilenameall = filenamestring + blocknumberstring + "_testrandomreward_all.txt"
-		testfilename_vid = filenamestring + blocknumberstring + "_testreward.h264"
+        testfilename = filenamestring + blocknumberstring + "_testnoreward.txt"
+        testfilenameall = filenamestring + blocknumberstring + "_testnoreward_all.txt"
+	testfilename_vid = filenamestring + blocknumberstring + "_testreward.h264"
 
 	testfile = []
 	testfileall = []
@@ -400,15 +388,9 @@ for i in range(1,repetitions):
 	testfilenamepath_vid = filepath_vid + testfilename_vid
         testfilenamepathall = filepath + testfilenameall
         testfilenamepath_positionframe = filepath + filenamestring + blocknumberstring + "_test_positionframe.txt"
-        
 
+        
 	print("test for seconds = " + str(testtime))
-	if rewardyn == "Y":
-                print("test with reward")
-        if rewardyn == "N":
-                print("test without reward")
-        if rewardyn == "R":
-                print("test with random reward")
 
 	fps = 10 #frame rate
 	rawCapture = PiRGBArray(camera, size=(resx,resy))
@@ -462,13 +444,7 @@ for i in range(1,repetitions):
 		statelist.append([curr_state,time.time()-starttime])
                 framecount = camera.frame.index
                 timestamp = time.time() - starttime
-		if rewardyn == "N":
-                        lightsvalves.run_test_noreward(prev_state, curr_state, nextclosest_state, testfile, testfileall, starttime, actionfile, framecount,maggot,statelist,odorontime)
-		if rewardyn == "Y":
-                        if reciprocal == "N":
-                                lightsvalves.run_test(prev_state, curr_state, testfile, testfileall, rewardpercent, starttime, actionfile, framecount,maggot,statelist)
-                        if reciprocal == "R":
-                                lightsvalves.reciprocal_run(prev_state, curr_state, testfile, testfileall, rewardpercent,starttime,actionfile, framecount,maggot,statelist)
+                lightsvalves.run_test_noreward(prev_state, curr_state, nextclosest_state, testfile, testfileall, starttime, actionfile, framecount,maggot,statelist,odorontime)
                 positionframefile.append([maggot,framecount,timestamp])
                 prev_pos = maggot
                 cv2.circle(new,tuple(maggot), 2, (0,0,255),-1)

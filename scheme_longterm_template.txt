@@ -10,18 +10,14 @@ NaiveTime (in seconds)
 3301
 Testing Time (in seconds)
 3601
-Reciprocal?
-N or R (normal or recip)
 If reward only part of training - how many reps rewarded?
 Number (if reward for whole thing, then just make this ptnumber)
 Reward only part of training - beginning, end, or all?
 A or F or L or B (reward all, reward first, reward last, extinction btw)
 # of Block Repetitions
 Number
-Test with reward?
-Y or N or R (yes, no, or randomize reward)
 Training type (N, P, L, S)
-N (normal) or P (phased) or L (longer air time) or S (spaced)
+N (normal) or P (phased) or L (longer air time) or S (spaced) or R (reciprocal)
 Phased Shifted Training (15s on 15s off but light out of phase with co2)
 CO2First or LightFirst
 Longer air training
