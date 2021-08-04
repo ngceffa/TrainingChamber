@@ -284,7 +284,7 @@ class LightsValves:
 			self.off(self.red)
 
 
-	def run_test_noreward(self,prev_state, curr_state, nextclosest_state, decisionfile, decisionall,starttime,framecount,maggot,odorontime):
+	def run_test_noreward(self,prev_state, curr_state, nextclosest_state, decisionfile, decisionall,starttime,framecount,maggot,odorontime, valvelog):
 		self.prev_state = prev_state
 		self.curr_state = curr_state
 		self.nextclosest_state = nextclosest_state
@@ -294,6 +294,7 @@ class LightsValves:
 		self.framecount = framecount
 		self.maggot = maggot
 		self.odorontime = odorontime
+		self.valvelog = valvelog
 		CO2 = [self.v1, self.v3, self.v5]
 		vac = [self.v2, self.v4, self.v6]
 		odorstate = []
@@ -307,17 +308,21 @@ class LightsValves:
 		if sum(vacstate) != 0:
                         vacon = vacstate.index(1) + 4
 			vacchan = vacstate.index(1) + 1
-		if sum(vacstate) == 0:
+		if sum(vacstate) == 0: 
 			vacon = 0
 		if self.prev_state - self.curr_state == -3 and self.curr_state != 3: #entering
 			if sum(odorstate) == 1 and vacon != self.curr_state: #it's not reentering original channel, it's chosen a new channel
 				vartime = framecount
 				timestamp = time.time() - starttime
                                 timestring = str(vartime)
-				print("Entering Channel "+ str(self.curr_state-3) + " " + timestring + ", time = " + str(timestamp))
-				self.decisionall.append(["Entering Channel "+ str(self.curr_state-3),timestring,str(timestamp)])
+				print("Entering Circle "+ str(self.curr_state-3) + " " + timestring + ", time = " + str(timestamp))
+				self.decisionall.append(["Entering Circle "+ str(self.curr_state-3),timestring,str(timestamp)])
 				vac_on = self.curr_state - 4
 				self.decisionall.append(["Vac On Channel "+ str(self.curr_state-3),timestring,str(timestamp)])
+                                if sum(odorstate) != 0:
+                                        co2channel = odorstate.index(1)+1
+                                if sum(vacstate) != 0:
+                                        prevvac = vacstate.index(1)+1
 				for i in range(0,3):
 					self.off(CO2[i])
 					self.off(vac[i])
@@ -326,6 +331,9 @@ class LightsValves:
 				self.starttime = 0
 				self.firstpass = 0
 				self.avoidtest = 0
+                                self.valvelog.append(["Vacuum Valve Closed - Channel "+ str(prevvac),timestring,str(timestamp)])
+                                self.valvelog.append(["CO2 Valve Closed - Channel "+ str(co2channel),timestring,str(timestamp)])
+                                self.valvelog.append(["Vacuum Valve Open - Channel "+ str(self.curr_state-3),timestring,str(timestamp)])
 		if self.prev_state - self.curr_state == 3 and self.curr_state != 0: #leaving
 			index = self.curr_state - 1 #python is zero indexed
 			vac_state = self.curr_state
@@ -334,14 +342,18 @@ class LightsValves:
                         if vac[index] != 1:
                         #if for some reason the wrong vacuum channel is on; like if the larva moved and it didn't record a decision, so still registering as being in another circle
                         #should not happen, but build in a failsafe just to make sure correct vac is always on!
+                                if sum(vacstate) != 0:
+                                        prevvac = vacstate.index(1)+1
                                 for i in range(0,3):
                                         self.off(vac[i])
                                 self.on(vac[index])
+                                self.valvelog.append(["Vacuum Valve Closed - Channel "+ str(prevvac),timestring,str(timestamp)])
+                                self.valvelog.append(["Vacuum Valve Open - Channel "+ str(self.curr_state),timestring,str(timestamp)])
 			if sum(odorstate) == 0: #if CO2 is not on, pick one
                                 vartime = framecount
                                 timestring = str(vartime)
                                 timestamp = time.time() - starttime
-				print("Leaving Channel " + str(self.curr_state) + " " + timestring+ ", time = " + str(timestamp))
+				print("Leaving Circle " + str(self.curr_state) + " " + timestring+ ", time = " + str(timestamp))
 				odor_on = random.choice(choices) #randomly choose one channel to have co2
 				print("CO2 + Air Down Channel " + str(odor_on) + " " + timestring + ", time = " + str(timestamp))
 				self.on(CO2[odor_on-1])
@@ -349,8 +361,9 @@ class LightsValves:
 				self.avoidtest = 0
 				self.firstpass = 0
                                 self.backuptest = 0 
-				self.decisionall.append(["Leaving Channel " + str(self.curr_state),timestring, str(timestamp)])
+				self.decisionall.append(["Leaving Circle " + str(self.curr_state),timestring, str(timestamp)])
 				self.decisionall.append(["CO2 + Air Down Channel " + str(odor_on),timestring, str(timestamp)])
+				self.valvelog.append(["CO2 Valve Open - Channel " + str(self.odor_on),timestring, str(timestamp)])
 			if sum(odorstate) == 2: #both odorstate valves are on, bad! this shouldn't ever happen but built in a failsafe to reset system
 				#shut off all CO2 valves
 				for i in range(0,3):
@@ -428,6 +441,7 @@ class LightsValves:
 					self.off(CO2[i])
 				print("Turn off CO2" + " " + timestring+ ", time = " + str(timestamp))
 				self.decisionall.append((["Turn off CO2",timestring,str(timestamp)]))
+				self.valvelog.append(["CO2 Valve Closed - Channel " + str(correct),timestring, str(timestamp)])
 		if maggot == [-1, -1]: #If tracker has lost the larva, turn off any CO2
                         vartime = framecount
                         timestring = str(vartime)
@@ -437,6 +451,8 @@ class LightsValves:
                                         self.off(CO2[i])
                                 print("Maggot Stop/NotFound - Turn off CO2" + " " + timestring+ ", time = " + str(timestamp))
                                 self.decisionall.append((["Maggot Stop/NotFound - Turn off CO2",timestring,str(timestamp)]))
+                                co2channel = odorstate.index(1)+1
+                                self.valvelog.append(["CO2 Valve Closed - Channel " + str(co2channel),timestring, str(timestamp)])
 		
 
 	

@@ -257,6 +257,10 @@ naivefilenamepathall_vid = filepath_vid + naivefilenameall_vid
 naivefile = []
 naiveall = []
 naiveframe = []
+valvelog = []
+valvelogname = filenamestring + blocknumberstring + "_naive_valvelog.txt"
+valvelogpath = filepath + valvelogname
+
 naivepercent = 0
 
 naivefilenamepath_positionframe = filepath + filenamestring + blocknumberstring + "_naive_positionframe.txt"
@@ -286,7 +290,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         prev_state, curr_state, nextclosest_state = statemachine.on_input(maggot)
 	framecount = camera.frame.index
 	timestamp = time.time()- starttime
-	lightsvalves.run_test_noreward(prev_state, curr_state, nextclosest_state, naivefile, naiveall, starttime, framecount,maggot,odorontime)
+	lightsvalves.run_test_noreward(prev_state, curr_state, nextclosest_state, naivefile, naiveall, starttime, framecount,maggot,odorontime, valvelog)
         positionframefile.append([maggot,framecount,timestamp])
         prev_pos = maggot
 	cv2.circle(new,tuple(maggot), 2, (0,0,255),-1)
@@ -304,6 +308,8 @@ camera.stop_recording()
 
 with open(naivefilenamepath,'w') as filehandle: #decision list (0,1)
 	filehandle.writelines("%s\n" % place for place in naivefile)
+with open(valvelogpath,'w') as filehandle: #valvelog 
+	filehandle.writelines("%s\n" % place for place in valvelog)
 with open(naivefilenamepathall,'w') as filehandle: #decision list descriptive
 	filehandle.writelines("%s\n" % place for place in naiveall)
 with open(naivefilenamepath_positionframe,'w') as filehandle: #larva position at each timestamp
@@ -374,18 +380,22 @@ for i in range(1,repetitions):
 	
 	blocknumber = i
 	blocknumberstring = str(blocknumber)
-        testfilename = filenamestring + blocknumberstring + "_testnoreward.txt"
-        testfilenameall = filenamestring + blocknumberstring + "_testnoreward_all.txt"
-	testfilename_vid = filenamestring + blocknumberstring + "_testreward.h264"
+        testfilename = filenamestring + blocknumberstring + "_test.txt"
+        testfilenameall = filenamestring + blocknumberstring + "_test_all.txt"
+	testfilename_vid = filenamestring + blocknumberstring + "_test.h264"
 
 	testfile = []
 	testfileall = []
         positionframefile = []
+        valvelog = []
         
 	testfilenamepath = filepath + testfilename
 	testfilenamepath_vid = filepath_vid + testfilename_vid
         testfilenamepathall = filepath + testfilenameall
         testfilenamepath_positionframe = filepath + filenamestring + blocknumberstring + "_test_positionframe.txt"
+
+        valvelogname = filenamestring + blocknumberstring + "_test_valvelog.txt"
+        valvelogpath = filepath + valvelogname
 
         
 	print("test for seconds = " + str(testtime))
@@ -441,7 +451,7 @@ for i in range(1,repetitions):
 		prev_state, curr_state, nextclosest_state = statemachine.on_input(maggot)
                 framecount = camera.frame.index
                 timestamp = time.time() - starttime
-                lightsvalves.run_test_noreward(prev_state, curr_state, nextclosest_state, testfile, testfileall, starttime,framecount,maggot,odorontime)
+                lightsvalves.run_test_noreward(prev_state, curr_state, nextclosest_state, testfile, testfileall, starttime,framecount,maggot,odorontime, valvelog)
                 positionframefile.append([maggot,framecount,timestamp])
                 prev_pos = maggot
                 cv2.circle(new,tuple(maggot), 2, (0,0,255),-1)
@@ -462,6 +472,8 @@ for i in range(1,repetitions):
 		filehandle.writelines("%s\n" % place for place in testfileall)
 	with open(testfilenamepath_positionframe,'w') as filehandle:
                 filehandle.writelines("%s\n" % place for place in positionframefile)
+        with open(valvelogpath,'w') as filehandle: #valvelog 
+                filehandle.writelines("%s\n" % place for place in valvelog)
 
 	print("test done")
 	print("block = " + blocknumberstring)
