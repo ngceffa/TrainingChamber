@@ -12,7 +12,7 @@ from statemachine import Three
 from statemachine import Four
 from statemachine import Five
 from statemachine import Six
-from lightsvalvesobject import LightsValves
+from lightsvalvesobject_longterm import LightsValves
 import random
 import RPi.GPIO as GPIO
 from collections import Counter
@@ -257,7 +257,6 @@ naivefilenamepathall_vid = filepath_vid + naivefilenameall_vid
 naivefile = []
 naiveall = []
 naiveframe = []
-actionfile = []
 naivepercent = 0
 
 naivefilenamepath_positionframe = filepath + filenamestring + blocknumberstring + "_naive_positionframe.txt"
@@ -287,7 +286,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         prev_state, curr_state, nextclosest_state = statemachine.on_input(maggot)
 	framecount = camera.frame.index
 	timestamp = time.time()- starttime
-	lightsvalves.run_test_noreward(prev_state, curr_state, nextclosest_state, naivefile, naiveall, starttime, actionfile, framecount,maggot,statelist,odorontime)
+	lightsvalves.run_test_noreward(prev_state, curr_state, nextclosest_state, naivefile, naiveall, starttime, framecount,maggot,odorontime)
         positionframefile.append([maggot,framecount,timestamp])
         prev_pos = maggot
 	cv2.circle(new,tuple(maggot), 2, (0,0,255),-1)
@@ -381,7 +380,6 @@ for i in range(1,repetitions):
 
 	testfile = []
 	testfileall = []
-        actionfile = []
         positionframefile = []
         
 	testfilenamepath = filepath + testfilename
@@ -441,10 +439,9 @@ for i in range(1,repetitions):
 		maggot = FindLarva(fgthresh)
 		disp = displacement(prev_pos,maggot)
 		prev_state, curr_state, nextclosest_state = statemachine.on_input(maggot)
-		statelist.append([curr_state,time.time()-starttime])
                 framecount = camera.frame.index
                 timestamp = time.time() - starttime
-                lightsvalves.run_test_noreward(prev_state, curr_state, nextclosest_state, testfile, testfileall, starttime, actionfile, framecount,maggot,statelist,odorontime)
+                lightsvalves.run_test_noreward(prev_state, curr_state, nextclosest_state, testfile, testfileall, starttime,framecount,maggot,odorontime)
                 positionframefile.append([maggot,framecount,timestamp])
                 prev_pos = maggot
                 cv2.circle(new,tuple(maggot), 2, (0,0,255),-1)

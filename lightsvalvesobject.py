@@ -284,17 +284,15 @@ class LightsValves:
 			self.off(self.red)
 
 
-	def run_test_noreward(self,prev_state, curr_state, nextclosest_state, decisionfile, decisionall,starttime,actionfile,framecount,maggot,statelist,odorontime):
+	def run_test_noreward(self,prev_state, curr_state, nextclosest_state, decisionfile, decisionall,starttime,framecount,maggot,odorontime):
 		self.prev_state = prev_state
 		self.curr_state = curr_state
 		self.nextclosest_state = nextclosest_state
 		self.decisionfile = decisionfile
 		self.decisionall = decisionall
 		self.starttime = starttime
-		self.actionfile = actionfile
 		self.framecount = framecount
 		self.maggot = maggot
-		self.statelist = statelist
 		self.odorontime = odorontime
 		CO2 = [self.v1, self.v3, self.v5]
 		vac = [self.v2, self.v4, self.v6]
@@ -353,7 +351,6 @@ class LightsValves:
                                 self.backuptest = 0 
 				self.decisionall.append(["Leaving Channel " + str(self.curr_state),timestring, str(timestamp)])
 				self.decisionall.append(["CO2 + Air Down Channel " + str(odor_on),timestring, str(timestamp)])
-				self.decisionall.append(["Air Down Channel " + str(vac_state),timestring, str(timestamp)])
 			if sum(odorstate) == 2: #both odorstate valves are on, bad! this shouldn't ever happen but built in a failsafe to reset system
 				#shut off all CO2 valves
 				for i in range(0,3):
@@ -397,7 +394,7 @@ class LightsValves:
 				self.decisionfile.append(0)
 				self.decisionall.append(["Avoid",timestring,str(timestamp)])
 				self.avoidtest = 1
-			if self.prev_state == 0 and self.curr_state == vacchan and self.backuptest == 0: #if it's backing up into original channel
+			if self.prev_state == 0 and self.curr_state == vacchan and self.backuptest == 0: #if it's backing up into original channel; don't count as a decision
                                 #this doesn't affect any decision lists; just there for keeping track of location
 				vartime = framecount
 				timestring = str(vartime)
@@ -408,7 +405,7 @@ class LightsValves:
                         currenttime = time.time() - starttime
 			odortime = self.odorontime[-1]
                         odorontotal = currenttime - odortime
-			if odorontotal >= self.timestopped: #If CO2 has been on for longer than 30 seconds, turn off co2 and reset
+			if odorontotal >= self.timestopped: #If CO2 has been on for longer than 30 seconds, turn off co2 and reset system
 				vartime = framecount
 				timestring = str(vartime)
 				timestamp = time.time() - starttime
