@@ -18,6 +18,7 @@ class LightsValves:
 		self.avoidtest = 0
 		self.starttime = 0
 		self.firstpass = 0
+		self.vacpass = 0
 		self.reciprocal_firstpass = 0
 		self.rewardtime = 10.1
 		self.avoidcode = 0
@@ -312,6 +313,7 @@ class LightsValves:
 			vacon = 0
 		if self.prev_state - self.curr_state == -3 and self.curr_state != 3: #entering
 			if sum(odorstate) == 1 and vacon != self.curr_state: #it's not reentering original channel, it's chosen a new channel
+				self.vacpass = 0
 				vartime = framecount
 				timestamp = time.time() - starttime
                                 timestring = str(vartime)
@@ -339,16 +341,21 @@ class LightsValves:
 			vac_state = self.curr_state
 			choices = [1,2,3]
 			del choices[index] #make sure CO2 choice isn't for the current channel
-                        if vac[index] != 1:
+                        if vac[index] != 1 and self.vacpass == 0:
                         #if for some reason the wrong vacuum channel is on; like if the larva moved and it didn't record a decision, so still registering as being in another circle
                         #should not happen, but build in a failsafe just to make sure correct vac is always on!
-                                if sum(vacstate) != 0:
+                                self.vacpass = 1
+                                vartime = framecount
+                                timestring = str(vartime)
+                                timestamp = time.time() - starttime
+				if sum(vacstate) != 0:
                                         prevvac = vacstate.index(1)+1
+					if prevvac != self.curr_state:
+                               			self.valvelog.append(["Vacuum Valve Closed - Channel "+ str(prevvac),timestring,str(timestamp)])
                                 for i in range(0,3):
                                         self.off(vac[i])
                                 self.on(vac[index])
-                                self.valvelog.append(["Vacuum Valve Closed - Channel "+ str(prevvac),timestring,str(timestamp)])
-                                self.valvelog.append(["Vacuum Valve Open - Channel "+ str(self.curr_state),timestring,str(timestamp)])
+                                 self.valvelog.append(["Vacuum Valve Open - Channel "+ str(self.curr_state),timestring,str(timestamp)])
 			if sum(odorstate) == 0: #if CO2 is not on, pick one
                                 vartime = framecount
                                 timestring = str(vartime)
