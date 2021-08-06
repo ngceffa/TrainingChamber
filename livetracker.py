@@ -239,6 +239,10 @@ if trainingtype == "P":
 	filenamestring = setupname+"_"+date+"_"+timeofday+"_"+"PT"+ptnumberstring+"_"+"PhaseShifted"+phasedtraining+"_"
 	videonamestring = setupname+"_"+date+"_"+"PhaseShifted"+phasedtraining+"_"
 
+if trainingtype == "S":
+	filenamestring = setupname+"_"+date+"_"+timeofday+"_"+"spaced_"+"PT"+ptnumberstring+"_"
+	videonamestring = setupname+"_"+date+"_"
+
 
 lightsvalves.offall()
 

@@ -355,7 +355,7 @@ class LightsValves:
                                 for i in range(0,3):
                                         self.off(vac[i])
                                 self.on(vac[index])
-                                 self.valvelog.append(["Vacuum Valve Open - Channel "+ str(self.curr_state),timestring,str(timestamp)])
+                                self.valvelog.append(["Vacuum Valve Open - Channel "+ str(self.curr_state),timestring,str(timestamp)])
 			if sum(odorstate) == 0: #if CO2 is not on, pick one
                                 vartime = framecount
                                 timestring = str(vartime)
@@ -370,7 +370,7 @@ class LightsValves:
                                 self.backuptest = 0 
 				self.decisionall.append(["Leaving Circle " + str(self.curr_state),timestring, str(timestamp)])
 				self.decisionall.append(["CO2 + Air Down Channel " + str(odor_on),timestring, str(timestamp)])
-				self.valvelog.append(["CO2 Valve Open - Channel " + str(self.odor_on),timestring, str(timestamp)])
+				self.valvelog.append(["CO2 Valve Open - Channel " + str(odor_on),timestring, str(timestamp)])
 			if sum(odorstate) == 2: #both odorstate valves are on, bad! this shouldn't ever happen but built in a failsafe to reset system
 				#shut off all CO2 valves
 				for i in range(0,3):
