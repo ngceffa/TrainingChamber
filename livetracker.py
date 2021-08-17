@@ -21,26 +21,47 @@ from BakCreator import BakCreator
 from BakCreator import FIFO
 
 def ExponentialFilter(current, new, weight):
+	"""Create a filtered version of the current image.
+
+	First check if the weight is between 0 and 1.
+	If negative: it's 0.
+	If >1: it's 1.
+
+	Then use cv2 AddWeighted if current has same shape as new.
+	Otherwise just copy the image...
+	"""
+	# the last thing is not super clear...
+	# also... is this actualyl a "filter"??
 	if weight < 0:
 		weight = 0
 	if weight > 1:
 		weight = 1
 	if weight == 1:
-		current = new.copy()
-	if current.shape !=  new.shape:
+		current = new.copy() 
+	if current.shape !=  new.shape: 
 		current = new
 	else:
 		current = cv2.addWeighted(new,weight,current,1-weight,0)
+		# linear blending  of new (with weight weight)
+		# and current (with weight 1-weight)
+		# and constant term 0
+		# w1 I1 + w2 I2 + c.
 	return current
 
 
 def readImage(cap):
-	im = camera.capture(cap, format = 'bgr')
+	# check the cap class!
+	""" Read an image from cap = capture class in cv2"""
+	#im = camera.capture(cap, format = 'bgr') # ? rewriting on the same?
 	im = cap.array
 	im = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
 	return im
 
-def displacement(new,prev):
+def displacement(new, prev):
+	"""Calculate the distance between two 2D vectors.
+	new = 'current' 2D vectror
+	prev = 'previous' 2D vector
+	"""
 	xi = prev[0]
 	xf = new[0]
 	yi = prev[1]
