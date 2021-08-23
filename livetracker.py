@@ -21,17 +21,17 @@ from BakCreator import BakCreator
 from BakCreator import FIFO
 
 def ExponentialFilter(current, new, weight):
-	"""Create a filtered version of the current image.
+	"""Create a "filtered" version of the current image.
 
 	First check if the weight is between 0 and 1.
 	If negative: it's 0.
 	If >1: it's 1.
 
 	Then use cv2 AddWeighted if current has same shape as new.
-	Otherwise just copy the image...
+	Otherwise just copy the image (current becomes new).
 	"""
 	# the last thing is not super clear...
-	# also... is this actualyl a "filter"??
+	# also... is this actualyl a "filter"?
 	if weight < 0:
 		weight = 0
 	if weight > 1:
@@ -41,20 +41,20 @@ def ExponentialFilter(current, new, weight):
 	if current.shape !=  new.shape: 
 		current = new
 	else:
-		current = cv2.addWeighted(new,weight,current,1-weight,0)
-		# linear blending  of new (with weight weight)
-		# and current (with weight 1-weight)
-		# and constant term 0
-		# w1 I1 + w2 I2 + c.
+		current = cv2.addWeighted(new, weight, current, 1-weight,0)
+		# linear blending  of new (with weight 'weight')
+		# and current (with weight '1-weight')
+		# and constant term 0.
+		# Formula:
+		# result = (weight_1 x Image_1) + (weight_2 x Image_2) + constant
 	return current
-
 
 def readImage(cap):
 	# check the cap class!
-	""" Read an image from cap = capture class in cv2"""
+	""" Read an image from cap ('capture') class in cv2"""
 	#im = camera.capture(cap, format = 'bgr') # ? rewriting on the same?
 	im = cap.array
-	im = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+	im = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY) # depending on the camera NB
 	return im
 
 def displacement(new, prev):
@@ -66,39 +66,92 @@ def displacement(new, prev):
 	xf = new[0]
 	yi = prev[1]
 	yf = new[1]
-	return(np.sqrt((xi-xf)**2 + (yf-yi)**2))
+	return(np.sqrt((xi - xf)**2 + (yf - yi)**2))
 
 def Centroid(cnt):
+	"""Calculate the centroid vector
+	of the image 'cnt'
+	using the first moments
+	"""
 	M = cv2.moments(cnt)
-	cx = int(M['m10']/M['m00'])
-	cy = int(M['m01']/M['m00'])
-	centroid = [cx,cy]
+	cx = int(M['m10'] / M['m00']) # x position of the center
+	cy = int(M['m01'] / M['m00']) # y position of the center
+	centroid = [cx, cy]
 	return centroid
 
+def FindLarva_2(img): # compacted function
+	"""Calculate the contours
+	and use them to compute the centroid
+	"""
+	_, contours, _ = cv2.findContours(
+		img, # input image
+		cv2.RETR_TREE, # contour retrieaval mode
+		# (this searches for all contour and organizes them in a hierarchy)
+		cv2.CHAIN_APPROX_NONE # contour approximation method -> none by default
+		)
+	# retrieve the areas for each countour
+	areas = []
+	for contour in contours:
+		areas.append(cv2.contourArea(contour))
+	# calculate the centroid
+	if len(areas) >= 1:
+		larva = contours[np.argmax(areas)]
+		centroid = Centroid(larva)
+	else:
+		centroid = [-1, -1] # fake centroid if no larva is found (?)
+							# it seems to act like a flag
+	return centroid
 
 def FindLarva(img):
-	_,contours,_ = cv2.findContours(img,cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE )
-#Neil/Rey: on Pi's with Buster, it's 2 arguments not 3 (so contours,_ not _,contours,_)
-	length =int(len(contours))
+	"""Calculate the contours and use them to compute the centroid"""
+	# _, contours, _ = cv2.findContours(
+	# 	img, # input image
+	# 	cv2.RETR_TREE, # contour retrieaval mode
+	# 	# (this searches for all contour and organizes them in a hierarchy)
+	# 	cv2.CHAIN_APPROX_NONE # contour approximation method -> none by default
+	# 	)
+
+	# Neil/Rey: on Pi's with Buster, 
+	# it's 2 arguments not 3
+	# so (contours,_) 
+	# not (_, contours, _)
+	# I think this is the correct one for us:
+	contours, _ = cv2.findContours(
+		img, # input image
+		cv2.RETR_TREE, # contour retrieaval mode
+		# (this searches for all contour and organizes them in a hierarchy)
+		cv2.CHAIN_APPROX_NONE # contour approximation method -> none by default
+		)
+	length = int(len(contours)) # int is redundant
 	areas = []
-	for i in range(0,length):
-		if length>0:
-			area= cv2.contourArea(contours[i])
+	for i in range(0, length):
+		if length > 0: # always satisfyed... ?
+			area = cv2.contourArea(contours[i])
 			areas.append(area)
 		else:
 			break
-	if len(areas)>=1:
-		largestCont = np.amax(areas)
+
+	# I would rather do:
+	# for contour in contours:
+	# 	areas.append(cv2.contourArea(contour))
+
+	if len(areas) >= 1:
+		largestCont = np.amax(areas) # should be always the fist one,
+									 # thanks to cv2.RETR_TREE hierarchy (?)
+									 # CHECK THIS!
+
 		loc = areas.index(largestCont)
 		larva = contours[loc]
+
 		centroid = Centroid(larva)
 		return centroid
 	else:
-		centroid = [-1,-1]
+		centroid = [-1, -1] # fake centroid if no larva is found (?)
+							# it seems to act like a flag
 		return centroid
 
-############################################################################################
-##################################CAMERA INITIALIZATION####################################
+# here the actual program starts
+##################################CAMERA INITIALIZATION#######################
 ir = 13
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
@@ -108,7 +161,7 @@ resx = 300
 resy = 300
 
 camera = PiCamera()
-camera.resolution = (resx,resy)
+camera.resolution = (resx, resy)
 camera.framerate = 20
 
 #getting the first frame

@@ -3,10 +3,12 @@ import numpy as np
 
 
 class StateMachine:
-	def __init__(self,initial, locs):
+
+	def __init__(self, initial, locs):
 		self.initial = initial
 		self.locs = locs
-		self.state = Initializer(self.initial,self.locs).starting_point(self.initial)
+		self.state =\
+			Initializer(self.initial, self.locs).starting_point(self.initial)
 	def on_input(self, input):
 		self.prevnumber = self.state.mynumber
 		if input == [-1,-1]: #if tracker lost larva, keep previous state
