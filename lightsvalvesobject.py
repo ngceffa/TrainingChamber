@@ -14,6 +14,7 @@ class LightsValves:
 		self.v4 = v4
 		self.v5 = v5
 		self.v6 = v6
+		# from here, default parameters
 		self.framecount = 0
 		self.avoidtest = 0
 		self.starttime = 0
@@ -28,7 +29,7 @@ class LightsValves:
 		self.enter3code = 4
 		self.leave1code = 5
 		self.leave2code = 6
-		self.leave3code = 7
+		self.leave3code = 7 # ? strange indentation
                 self.co2down1code = 8
                 self.co2down2code = 9
                 self.co2down3code = 10
@@ -49,6 +50,7 @@ class LightsValves:
 
 	def on(self, pin):
 		GPIO.output(pin,GPIO.HIGH)
+
 	def off(self, pin):
 		GPIO.output(pin, GPIO.LOW)
 
@@ -129,7 +131,6 @@ class LightsValves:
 				for i in range(1,3):
 					self.off(CO2[i])
 
-
 	def spacedtraining(self,ptnum,spacedptnum,spacedtrainingreps):
 		CO2 = [self.v1, self.v3, self.v5]
 		vac = [self.v2, self.v4, self.v6]
@@ -162,7 +163,6 @@ class LightsValves:
 			time.sleep(self.pttime)
 			self.off(self.red)
 			time.sleep(self.pttime)
-
 
 	def phasetrain_co2first(self, ptnum):
 		CO2 = [self.v1, self.v3, self.v5]
@@ -241,7 +241,6 @@ class LightsValves:
 			time.sleep(self.pttime)
 			self.off(self.red)
 
-
 	def longerairtwoco2(self, ptnum):
 		CO2 = [self.v1, self.v3, self.v5]
 		vac = [self.v2, self.v4, self.v6]
@@ -283,7 +282,6 @@ class LightsValves:
 			self.on(self.red)
 			time.sleep(self.pttime)
 			self.off(self.red)
-
 
 	def run_test_noreward(self,prev_state, curr_state, nextclosest_state, decisionfile, decisionall,starttime,framecount,maggot,odorontime, valvelog):
 		self.prev_state = prev_state
@@ -342,8 +340,11 @@ class LightsValves:
 			choices = [1,2,3]
 			del choices[index] #make sure CO2 choice isn't for the current channel
                         if vac[index] != 1 and self.vacpass == 0:
-                        #if for some reason the wrong vacuum channel is on; like if the larva moved and it didn't record a decision, so still registering as being in another circle
-                        #should not happen, but build in a failsafe just to make sure correct vac is always on!
+                        #if for some reason the wrong vacuum channel is on;\
+						# like if the larva moved and it didn't record a decision,
+						# so still registering as being in another circle
+                        #should not happen, but build in a failsafe just to 
+						# make sure correct vac is always on!
                                 self.vacpass = 1
                                 vartime = framecount
                                 timestring = str(vartime)
@@ -430,7 +431,8 @@ class LightsValves:
 				timestring = str(vartime)
 				timestamp = time.time() - starttime
 				if self.curr_state == 0:
-				#only check where it's closest to if it's already in the center; this is to weed out when the larva is wandering in the circle
+				#only check where it's closest to if it's already in the center;
+				# this is to weed out when the larva is wandering in the circle
 					if self.nextclosest_state == correct and self.firstpass == 0:
 						print("Choose" + " " + timestring+ ", time = " + str(timestamp))
 						self.decisionfile.append(1)
@@ -460,9 +462,7 @@ class LightsValves:
                                 self.decisionall.append((["Maggot Stop/NotFound - Turn off CO2",timestring,str(timestamp)]))
                                 co2channel = odorstate.index(1)+1
                                 self.valvelog.append(["CO2 Valve Closed - Channel " + str(co2channel),timestring, str(timestamp)])
-		
 
-	
 	def offall(self):
 		CO2 = [self.v1, self.v3, self.v5]
 		vac = [self.v2, self.v4, self.v6]

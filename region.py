@@ -57,7 +57,7 @@ class Region(object):
 
 	def processPoint(self, x):
 		"""Return a transition flag"""
-		hyst = 20 # cutoff for considering a "transition"
+		hyst = 10 # cutoff for considering a "transition"
 		neighbors = self.locs 
 		mydist = self.distance(x, self.loc)
 		ndist = self.distance(x, neighbors)
@@ -83,11 +83,24 @@ class Region(object):
 		"""Compacted the previous method"""
 		ndist = self.distance(x, self.locs)
 		self.state = np.argmin(ndist)
+	
+	def getnextclosestState(self,x): #gets state larva is closest to
+		neighbors = self.locs
+		ndist = self.distance(x,neighbors)
+		closest = np.amin(ndist)
+		m, sm = float('inf'), float('inf')
+		for x in ndist:
+			if x <= m:
+				m, sm = x, m
+			elif x < sm:
+                                sm = x
+		ndist_list = np.ndarray.tolist(ndist)
+		state = ndist_list.index(sm)
+
 
 
 class Roi(object):
     """Refactored Region class"""
-
     def  __init__(self, loc, locs, threshold=20):
         """Find better names maybe
         loc = 2D vector
@@ -102,8 +115,8 @@ class Roi(object):
     def process_point(self, point):
         """Search for transition.
         If there is one, put transition flag to True"""
-        my_distance = roi_distance(point, self.loation)
-        n_distances = roi_distance(point, self.loations)
+        my_distance = roi_distance(point, self.location)
+        n_distances = roi_distance(point, self.locations)
         closest = np.amin(n_distances)
         if (my_distance - self.threshold) > closest and closest != my_distance:
             self.transition_flag = True

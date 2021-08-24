@@ -152,14 +152,16 @@ def FindLarva(img):
 
 # here the actual program starts
 ##################################CAMERA INITIALIZATION#######################
+# Raspberry Pi variables
 ir = 13
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 GPIO.setup(ir,GPIO.OUT)
 GPIO.output(ir,GPIO.HIGH)
+
+# Camera
 resx = 300
 resy = 300
-
 camera = PiCamera()
 camera.resolution = (resx, resy)
 camera.framerate = 20
@@ -193,13 +195,18 @@ number_of_regions = 7
 cv2.namedWindow('Frame')
 cv2.setMouseCallback('Frame', selectRegions)
 
-for frame in camera.capture_continuous(rawCapture, format = 'bgr', use_video_port = True):
+for frame in camera.capture_continuous(
+	rawCapture,
+	format = 'bgr',
+	use_video_port = True
+	):
 	image = frame.array
 	cv2.imshow('Frame', image)
 	key= cv2.waitKey(1) & 0xFF
 	rawCapture.truncate(0)
 	if len(locs) == number_of_regions:
-		response = input("Are you satisfied with the regions you have selected? (yes/no)")
+		response = input(
+			"Are you satisfied with the regions you have selected? (yes/no)")
 		if response == "yes":
 			break
 		if response == "no":
@@ -246,14 +253,18 @@ fps = 10 #frame rate
 rawCapture = PiRGBArray(camera, size=(resx,resy))
 rawCapture_0 = PiRGBArray(camera, size=(resx,resy))
 frame_0 = readImage(rawCapture_0)
-Ims = deque()                   #set up FIFO data structure for video frames
+Ims = deque()               #set up FIFO data structure for video frames
 Ims.append(frame_0)
-N = 1                           #N keeps track of how many frames have gone by
-window = 60                     #sets the length of the window over which mean is calculated
+N = 1              #N keeps track of how many frames have gone by
+window = 60        #sets the length of the window over which mean is calculated
 
 print('Building Background')
 
-for frame in camera.capture_continuous(rawCapture, format = 'bgr', use_video_port = True):
+for frame in camera.capture_continuous(
+	rawCapture,
+	format = 'bgr',
+	use_video_port = True
+	):
     im = frame.array
     im=cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
     if N == fps:            #add a new frame to kernel each second
