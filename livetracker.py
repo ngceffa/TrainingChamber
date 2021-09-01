@@ -20,6 +20,7 @@ from collections import deque
 from BakCreator import BakCreator
 from BakCreator import FIFO
 
+# Not used
 def ExponentialFilter(current, new, weight):
 	"""Create a "filtered" version of the current image.
 
@@ -49,6 +50,7 @@ def ExponentialFilter(current, new, weight):
 		# result = (weight_1 x Image_1) + (weight_2 x Image_2) + constant
 	return current
 
+# Add this to the Camera class
 def readImage(cap):
 	# check the cap class!
 	""" Read an image from cap ('capture') class in cv2"""
@@ -57,6 +59,7 @@ def readImage(cap):
 	im = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY) # depending on the camera NB
 	return im
 
+# this is just np.linalg.norm(new - prev)
 def displacement(new, prev):
 	"""Calculate the distance between two 2D vectors.
 	new = 'current' 2D vectror
@@ -68,6 +71,7 @@ def displacement(new, prev):
 	yf = new[1]
 	return(np.sqrt((xi - xf)**2 + (yf - yi)**2))
 
+# Ok
 def Centroid(cnt):
 	"""Calculate the centroid vector
 	of the image 'cnt'
@@ -273,7 +277,7 @@ for frame in camera.capture_continuous(
     if len(Ims)==window:
             bgim = np.median(Ims, axis=0).astype(dtype = np.uint8)
             break
-    N +=1
+    N +=1 # is this really going at 10 fps?
     cv2.imshow('background', im)
     key= cv2.waitKey(1) & 0xFF
     rawCapture.truncate(0)
@@ -357,7 +361,8 @@ positionframefile = []
 
 rawCapture = PiRGBArray(camera, size=(resx,resy))
 
-bgCreate = BakCreator(stacklen = 60, alpha = 0.02, bgim=bgim)  #create an instance of the background update class
+bgCreate = BakCreator(stacklen = 60, alpha = 0.02, bgim=bgim) 
+#create an instance of the background update class
 #loading = True								#variable to load up FIFO queues
 #use_init = True								#use the background built initially
 
@@ -379,7 +384,8 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         prev_state, curr_state, nextclosest_state = statemachine.on_input(maggot)
 	framecount = camera.frame.index
 	timestamp = time.time()- starttime
-	lightsvalves.run_test_noreward(prev_state, curr_state, nextclosest_state, naivefile, naiveall, starttime, framecount,maggot,odorontime, valvelog)
+	lightsvalves.run_test_noreward(prev_state, curr_state, nextclosest_state,
+	naivefile, naiveall, starttime, framecount,maggot,odorontime, valvelog)
         positionframefile.append([maggot,framecount,timestamp])
         prev_pos = maggot
 	cv2.circle(new,tuple(maggot), 2, (0,0,255),-1)

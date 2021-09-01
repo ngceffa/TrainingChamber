@@ -129,4 +129,10 @@ class Roi(object):
         self.state = np.argmin(n_distances)
 
 
-    
+if __name__ == '__main__':
+
+	loc = [0, 0]
+	locs = np.asarray(([0, 0], [1 , 1], [-1, -1], [10, 10]))
+	reg = Region(loc, locs)
+	ciao = reg.getnextclosestState([5,5])
+	print(ciao)
